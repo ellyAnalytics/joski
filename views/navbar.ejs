@@ -1,0 +1,30 @@
+<!-- Top Navbar -->
+
+  <!-- Toggle button (visible only on small screens) -->
+  <button class="btn btn-outline-dark d-lg-none" type="button" mt-2
+          data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+    <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+  </button>
+
+  
+</nav>
+
+<!-- Offcanvas Sidebar (mobile / tablet) -->
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title">Joski and Sons Stores</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="nav flex-column gap-1">
+            <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/products"><i class="bi bi-box-seam me-2"></i>Products</a></li>
+            <li class="nav-item"><a class="nav-link" href="/sales-report"><i class="bi bi-bar-chart-line me-2"></i>Sales Report</a></li>
+            <li class="nav-item"><a class="nav-link" href="/credit-report"><i class="bi bi-bar-chart-line me-2"></i>Credit Report</a></li>
+          <li class="nav-item"><a class="nav-link" href="/credit"><i class="bi bi-bar-chart-line me-2"></i>Add New Credit</a></li>
+            <li class="nav-item"><a class="nav-link" href="/users"><i class="bi bi-person-circle me-2"></i>Profile</a></li>
+            <li class="nav-item mt-2"><a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>

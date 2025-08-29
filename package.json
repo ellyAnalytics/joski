@@ -1,0 +1,25 @@
+{
+  "name": "joska",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "ejs": "^3.1.10",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "fs": "^0.0.1-security",
+    "moment": "^2.30.1",
+    "multer": "^2.0.2",
+    "path": "^0.12.7",
+    "pdfkit": "^0.17.1",
+    "sqlite3": "^5.1.7"
+  }
+}
