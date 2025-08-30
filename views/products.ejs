@@ -58,6 +58,15 @@
     </a>
   </div>
 
+<div style="margin-bottom: 15px;">
+  <a href="/products/add" class="btn btn-primary">➕ Add Product</a>
+
+  <form action="/products/delete-all" method="POST" style="display:inline;"
+        onsubmit="return confirm('⚠️ Are you sure you want to delete ALL products? This cannot be undone!');">
+    <button type="submit" class="btn btn-danger">🗑️ Delete All Products</button>
+  </form>
+</div>
+
 </div>
 
     <!-- Products Table -->
@@ -172,3 +181,4 @@ function filterTable() {
 
 </body>
 </html>
+
