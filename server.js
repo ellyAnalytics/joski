@@ -369,6 +369,17 @@ app.post("/products/delete/:id",requireAdmin, (req, res) => {
   });
 });
 
+// Delete ALL products
+app.post("/products/delete-all", requireAdmin, (req, res) => {
+  db.run("DELETE FROM products", function (err) {
+    if (err) {
+      console.error(err.message);
+      return res.status(500).send("Failed to delete all products.");
+    }
+    res.redirect("/products");
+  });
+});
+
 
 // Import products from Excel
 app.post("/products/import", upload.single("excelFile"), async (req, res) => {
@@ -1152,3 +1163,4 @@ app.post("/users/change-password/:username", requireAdmin, (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
