@@ -263,19 +263,25 @@ app.get("/products",requireAdmin, (req, res) => {
 });
 
 // Utility: Generate unique 4-digit code
-function generateProductCode(callback) {
-  function tryCode() {
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    db.get("SELECT * FROM products WHERE code = ?", [code], (err, row) => {
-      if (row) {
-        tryCode(); // code exists, retry
-      } else {
-        callback(code);
-      }
-    });
-  }
-  tryCode();
+function generateUniqueCode() {
+  return new Promise((resolve, reject) => {
+    function tryCode() {
+      const code = Math.floor(1000 + Math.random() * 9000).toString();
+      db.get("SELECT * FROM products WHERE code = ?", [code], (err, row) => {
+        if (err) return reject(err);
+        if (row) {
+          // code exists → try again
+          tryCode();
+        } else {
+          // unique code found
+          resolve(code);
+        }
+      });
+    }
+    tryCode();
+  });
 }
+
 
 // Add Product Form
 app.get("/products/add", requireAdmin,(req, res) => {
@@ -382,53 +388,65 @@ app.post("/products/delete-all", requireAdmin, (req, res) => {
 
 
 // Import products from Excel
-app.post("/products/import", upload.single("excelFile"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).send("No file uploaded");
-    }
-
+// importing from to excel
+app.post(
+  "/products/import",
+  requireAdmin,
+  upload.single("excelFile"),
+  async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(req.file.path);
-    const sheet = workbook.worksheets[0]; // first sheet
+    const worksheet = workbook.worksheets[0];
 
-    // Skip header row, loop rows
-    for (let i = 2; i <= sheet.rowCount; i++) {
-      const row = sheet.getRow(i);
+    try {
+      for (let i = 2; i <= worksheet.rowCount; i++) {
+        const row = worksheet.getRow(i);
+        const name = row.getCell(1).value
+          ? row.getCell(1).value.toString().trim()
+          : ""; // Column A// Product Name
+        const remainingQty = row.getCell(2).value || 0; //Column B: Remaining Qty
+        const actualPrice = row.getCell(3).value || 0; // Column C: Actual Price
+        const sellingPrice = row.getCell(4).value || 0; // Column D: Selling Price
 
-      const name = row.getCell(1).value;         // Column A → Product Name
-      const remainingQty = row.getCell(2).value; // Column B → Remaining Qty
-      const actualPrice = row.getCell(3).value;  // Column C → Actual Price
-      const sellingPrice = row.getCell(4).value; // Column D → Selling Price
+        if (!name) continue;
 
-      if (!name) continue; // skip empty
+        // check if name exists
+        const existing = await new Promise((resolve, reject) => {
+          db.get(
+            "SELECT * FROM products WHERE LOWER(name) = LOWER(?)",
+            [name],
+            (err, row) => {
+              if (err) reject(err);
+              else resolve(row);
+            }
+          );
+        });
+        if (existing) continue;
 
-      // Check if product already exists
-      db.get("SELECT * FROM products WHERE LOWER(name) = LOWER(?)", [name], (err, existing) => {
-        if (err) return console.error(err);
+        // generate a unique random code
+        const code = await generateUniqueCode();
 
-        if (!existing) {
-          // Generate unique code before insert
-          generateProductCode((code) => {
-            db.run(
-              `INSERT INTO products (code, name, remainingQty, actualPrice, sellingPrice)
-               VALUES (?, ?, ?, ?, ?)`,
-              [code, name, remainingQty || 0, actualPrice || 0, sellingPrice || 0],
-              (err2) => {
-                if (err2) console.error("Insert error:", err2.message);
-              }
-            );
-          });
-        }
-      });
+        // insert product
+        await new Promise((resolve, reject) => {
+          db.run(
+            `INSERT INTO products (code, name, remainingQty, actualPrice, sellingPrice)
+           VALUES (?, ?, ?, ?, ?)`,
+            [code, name, remainingQty, actualPrice, sellingPrice],
+            (err2) => {
+              if (err2) reject(err2);
+              else resolve();
+            }
+          );
+        });
+      }
+
+      res.redirect("/products");
+    } catch (err) {
+      console.error("Import error:", err.message);
+      res.status(500).send("Failed to import products.");
     }
-
-    res.redirect("/products"); // back to products page
-  } catch (err) {
-    console.error("Import error:", err.message);
-    res.status(500).send("Failed to import products");
   }
-});
+);
 
 
 // Logout route
@@ -1163,4 +1181,5 @@ app.post("/users/change-password/:username", requireAdmin, (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
 
